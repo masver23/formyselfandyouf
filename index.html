@@ -1,55 +1,140 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <title>Quotes & Musik</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Midnight Drizzle</title>
 
-    <!-- Penting untuk tampilan smartphone -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+body {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    background: linear-gradient(180deg, #000000, #111111, #1a1a1a);
+    color: #f1f1f1;
+    font-family: 'Times', new-roman;
+    text-align: center;
+    padding: 20px;
+    overflow: hidden;
+}
 
-        body {
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            background: black;
-            color: white;
-            font-family: Times, new-roman;
-            text-align: center;
-            padding: 20px;
-        }
+/* Canvas di belakang */
+canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 0;
+}
 
-        .quotes {
-            font-size: clamp(18px, 5vw, 28px);
-            margin-bottom: 30px;
-            max-width: 600px;
-            line-height: 1.5;
-        }
+/* Quotes */
+.quotes {
+    font-size: clamp(18px, 5vw, 28px);
+    max-width: 600px;
+    line-height: 1.6;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 4s ease forwards;
+    z-index: 2;
+}
 
-        audio {
-            width: 100%;
-            max-width: 400px;
-        }
-    </style>
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+audio {
+    margin-top: 40px;
+    width: 100%;
+    max-width: 400px;
+    z-index: 2;
+}
+</style>
 </head>
 
 <body>
 
-    <div class="quotes">
-        "Until next time, when moments find us again."
-    </div>
+<canvas id="rain"></canvas>
 
-    <audio controls autoplay>
-        <source src="lagu.mp3" type="audio/mpeg">
-    </audio>
+<div class="quotes">
+    "Until next time, when moments find us again."
+</div>
+
+<audio id="musik" autoplay>
+    <source src="lagu.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+/* ===== GERIMIS HALUS ===== */
+const canvas = document.getElementById("rain");
+const ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let raindrops = [];
+
+for (let i = 0; i < 50; i++) { // jumlah sedikit = gerimis
+    raindrops.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        length: Math.random() * 15 + 10,
+        speed: Math.random() * 2 + 1
+    });
+}
+
+function drawRain() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = "rgba(255,255,255,0.15)";
+    ctx.lineWidth = 1;
+
+    for (let i = 0; i < raindrops.length; i++) {
+        let r = raindrops[i];
+        ctx.beginPath();
+        ctx.moveTo(r.x, r.y);
+        ctx.lineTo(r.x, r.y + r.length);
+        ctx.stroke();
+
+        r.y += r.speed;
+
+        if (r.y > canvas.height) {
+            r.y = -20;
+            r.x = Math.random() * canvas.width;
+        }
+    }
+}
+
+setInterval(drawRain, 30);
+
+/* ===== LAGU FADE IN ===== */
+const audio = document.getElementById("musik");
+audio.volume = 0;
+
+audio.addEventListener("play", function() {
+    let fade = setInterval(() => {
+        if (audio.volume < 0.9) {
+            audio.volume += 0.02;
+        } else {
+            clearInterval(fade);
+        }
+    }, 200);
+});
+
+/* Resize fix */
+window.addEventListener("resize", () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+});
+</script>
 
 </body>
 </html>
